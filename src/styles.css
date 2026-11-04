@@ -238,3 +238,7 @@
   color: var(--foreground) !important;
   border: 1px solid var(--border);
 }
+
+.leaflet-container, .leaflet-grab, .leaflet-dragging .leaflet-grab {
+  cursor: var(--cursor-earth), grab !important;
+}
