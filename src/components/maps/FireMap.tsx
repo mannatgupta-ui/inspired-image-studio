@@ -45,7 +45,7 @@ function DrawBox({ active, onDone }: { active: boolean; onDone?: ((b: [number, n
   return <Rectangle bounds={[[start.lat, start.lng], [cur.lat, cur.lng]]} pathOptions={{ color: "#39D5FF", weight: 1, dashArray: "4 4", fillOpacity: 0.08 }} />;
 }
 
-function Fly({ to }: { to?: [[number, number], [number, number]] | null }) {
+function Fly({ to }: { to?: [[number, number], [number, number]] | null | undefined }) {
   const map = useMap();
   useEffect(() => { if (to) map.flyToBounds(to, { duration: 1.2, padding: [30, 30] }); }, [to, map]);
   return null;
