@@ -242,3 +242,24 @@
 .leaflet-container, .leaflet-grab, .leaflet-dragging .leaflet-grab {
   cursor: var(--cursor-earth), grab !important;
 }
+
+.chat-md p { margin: 0 0 0.5rem; line-height: 1.55; }
+.chat-md ul, .chat-md ol { margin: 0 0 0.5rem 1.1rem; list-style: disc; }
+.chat-md ol { list-style: decimal; }
+.chat-md li { margin: 0.15rem 0; }
+.chat-md strong { color: var(--primary); font-weight: 600; }
+.chat-md table { width: 100%; font-size: 0.75rem; border-collapse: collapse; margin: 0.5rem 0; }
+.chat-md th, .chat-md td { border: 1px solid var(--border); padding: 0.25rem 0.4rem; text-align: left; }
+.chat-md code { font-size: 0.75rem; background: var(--surface-2); padding: 0 0.25rem; border-radius: 3px; }
+
+/* User-resizable panels: drag the grip at the bottom edge */
+.panel[data-resized] { display: flex; flex-direction: column; overflow: hidden; }
+.panel[data-resized] > .panel-body { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: auto; }
+.panel[data-resized] > .panel-body > div:has(> .recharts-responsive-container) { flex: 1; height: auto; min-height: 8rem; }
+.rs-handle { position: relative; flex-shrink: 0; background: transparent; transition: background 0.15s; }
+.rs-handle::after { content: ""; position: absolute; border-radius: 9999px; background: var(--border); }
+.rs-handle[aria-orientation="vertical"] { width: 10px; cursor: col-resize; }
+.rs-handle[aria-orientation="vertical"]::after { top: 50%; left: 50%; width: 3px; height: 40px; transform: translate(-50%, -50%); }
+.rs-handle[aria-orientation="horizontal"] { height: 10px; cursor: row-resize; }
+.rs-handle[aria-orientation="horizontal"]::after { top: 50%; left: 50%; height: 3px; width: 40px; transform: translate(-50%, -50%); }
+.rs-handle:hover::after, .rs-handle[data-separator="active"]::after { background: var(--primary); }

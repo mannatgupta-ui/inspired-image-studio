@@ -6,6 +6,8 @@ import {
 import { useSelection, setSelection } from "@/lib/store";
 import { REGIONS } from "@/lib/fire-data";
 import { cn } from "@/lib/utils";
+import { ChatAssistant } from "./ChatAssistant";
+import { MessageSquare } from "lucide-react";
 
 const NAV = [
   { to: "/", label: "Overview", icon: Globe2 },
@@ -38,6 +40,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [compact, setCompact] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
   const sel = useSelection();
+  const [chatOpen, setChatOpen] = useState(true);
 
   return (
     <div className="flex min-h-screen w-full ambient">
@@ -132,6 +135,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             FIRMS · MODIS C6.1 + VIIRS 375m
           </span>
           <div className="ml-auto flex items-center gap-3">
+            <button onClick={() => setChatOpen((o) => !o)} className={cn("hidden items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs md:flex", chatOpen ? "border-primary/50 text-primary" : "border-input text-muted-foreground hover:text-foreground")}>
+              <MessageSquare className="h-3.5 w-3.5" /> Assistant
+            </button>
             <span className="hidden items-center gap-2 font-mono text-[11px] text-success sm:flex">
               <Radio className="h-3.5 w-3.5 animate-pulse-dot" /> DEMO FEED
             </span>
@@ -151,7 +157,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        <main className="min-w-0 flex-1">{children}</main>
+        <div className="flex min-w-0 flex-1">
+          <main className="min-w-0 flex-1">{children}</main>
+          <ChatAssistant open={chatOpen} onClose={() => setChatOpen(false)} />
+        </div>
       </div>
     </div>
   );

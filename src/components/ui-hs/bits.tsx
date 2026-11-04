@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export const LazyFireMap = lazy(() => import("@/components/maps/FireMap"));
@@ -14,11 +14,22 @@ export function MapFallback() {
   return <div className="flex h-full w-full items-center justify-center bg-surface font-mono text-xs text-muted-foreground">INITIALISING GEOSPATIAL LAYER…</div>;
 }
 
-export function Panel({ title, eyebrow, right, children, className }: { title?: string; eyebrow?: string; right?: ReactNode; children: ReactNode; className?: string }) {
+export function Panel({ title, eyebrow, right, children, className, resizable = true }: { title?: string; eyebrow?: string; right?: ReactNode; children: ReactNode; className?: string; resizable?: boolean }) {
+  const ref = useRef<HTMLElement>(null);
+  const [h, setH] = useState<number | null>(null);
+  const start = (e: React.PointerEvent) => {
+    e.preventDefault();
+    const y0 = e.clientY, h0 = ref.current?.getBoundingClientRect().height ?? 300;
+    const move = (ev: PointerEvent) => setH(Math.max(140, Math.min(1400, h0 + ev.clientY - y0)));
+    const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); document.body.style.cursor = ""; };
+    document.body.style.cursor = "row-resize";
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
   return (
-    <section className={cn("panel p-5", className)}>
+    <section ref={ref} data-resized={h != null ? "" : undefined} style={h != null ? { height: h } : undefined} className={cn("panel relative p-5", resizable && "pb-6", className)}>
       {(title || eyebrow) && (
-        <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="mb-4 flex shrink-0 items-start justify-between gap-3">
           <div>
             {eyebrow && <div className="eyebrow">{eyebrow}</div>}
             {title && <h3 className="mt-1 text-base font-semibold">{title}</h3>}
@@ -26,7 +37,13 @@ export function Panel({ title, eyebrow, right, children, className }: { title?: 
           {right}
         </div>
       )}
-      {children}
+      <div className="panel-body">{children}</div>
+      {resizable && (
+        <div onPointerDown={start} onDoubleClick={() => setH(null)} title="Drag to resize · double-click to reset"
+          className="group absolute inset-x-0 bottom-0 flex h-4 cursor-row-resize items-center justify-center">
+          <span className="h-[3px] w-10 rounded-full bg-border transition-colors group-hover:bg-primary" />
+        </div>
+      )}
     </section>
   );
 }

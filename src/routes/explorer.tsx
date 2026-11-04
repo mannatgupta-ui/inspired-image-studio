@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Square, RotateCcw, Crosshair, Layers, MapPin } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Group, Panel as RPanel, Separator } from "react-resizable-panels";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ClientOnly, LazyEarth, LazyFireMap, MapFallback, Panel, DemoBadge, Seg, chartTooltip, axis } from "@/components/ui-hs/bits";
 import { ExportDialog } from "@/components/export/ExportDialog";
 import type { Viz } from "@/components/maps/FireMap";
-import { bboxAreaKm2, fmt, MONTHS, REGIONS, regionsInBox, sampleHotspots, type Sensor } from "@/lib/fire-data";
+import { bboxAreaKm2, fmt, MONTHS, REGIONS, regionSeries, regionsInBox, seasonalAverages, yearlyTotals, sampleHotspots, type Sensor } from "@/lib/fire-data";
 import { setSelection, useSelection } from "@/lib/store";
 import { useSelectedSeries } from "@/lib/use-series";
 
@@ -56,9 +57,25 @@ function Explorer() {
   }));
   const total = monthly.reduce((s, x) => s + x.v, 0);
 
+  const yearly = yearlyTotals(series).filter((y) => y.year >= fromYear && y.year <= toYear);
+  const seasonal = seasonalAverages(series.filter((r) => r.year >= fromYear && r.year <= toYear));
+  const regionRows = (sel.regionId === "global" || !sel.regionIds.length ? REGIONS : REGIONS.filter((r) => sel.regionIds.includes(r.id)))
+    .map((r) => {
+      const rs = regionSeries(r.id).filter((x) => x.year >= fromYear && x.year <= toYear);
+      const tot = rs.reduce((a, x) => a + x.harmonised, 0);
+      const peak = rs.reduce((a, x) => (x.harmonised > a.harmonised ? x : a), rs[0]);
+      return { name: r.name, tot, peak: peak ? `${MONTHS[peak.month]} ${peak.year}` : "–" };
+    })
+    .sort((a, b) => b.tot - a.tot);
+  const maxTot = Math.max(1, ...regionRows.map((r) => r.tot));
+
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6 xl:flex-row">
-      <div className="w-full shrink-0 space-y-4 xl:w-[300px]">
+    <div className="h-[calc(100vh-4rem)] min-h-[760px] p-3 md:p-4">
+      <Group orientation="vertical" className="h-full">
+        <RPanel defaultSize="64" minSize="35">
+          <Group orientation="horizontal" className="h-full">
+            <RPanel defaultSize="21" minSize="14">
+      <div className="h-full space-y-4 overflow-y-auto pr-1">
         <div className="glass space-y-4 rounded-lg p-4">
           <div className="flex items-center justify-between"><span className="eyebrow text-primary">Control panel</span><DemoBadge /></div>
           <div className="flex gap-2">
@@ -97,7 +114,10 @@ function Explorer() {
         </div>
       </div>
 
-      <div className="relative h-[70vh] min-h-[520px] flex-1 overflow-hidden rounded-lg border border-border">
+            </RPanel>
+            <Separator className="rs-handle" />
+            <RPanel defaultSize="51" minSize="25">
+      <div className="relative h-full overflow-hidden rounded-lg border border-border">
         <ClientOnly fallback={<MapFallback />}>
           {view === "globe" ? (
             <LazyEarth
@@ -117,7 +137,10 @@ function Explorer() {
         </div>
       </div>
 
-      <aside className="w-full space-y-4 xl:w-[380px]">
+            </RPanel>
+            <Separator className="rs-handle" />
+            <RPanel defaultSize="28" minSize="18">
+      <aside className="h-full space-y-4 overflow-y-auto pl-1">
         <Panel eyebrow="Selected area" title={sel.label}>
           <dl className="grid grid-cols-2 gap-3 font-mono text-xs">
             <div><dt className="text-muted-foreground">AREA</dt><dd className="mt-1 text-lg text-foreground">{bbox ? fmt(bboxAreaKm2(...bbox)) + " km²" : "Global"}</dd></div>
@@ -150,6 +173,64 @@ function Explorer() {
         </Panel>
         <div className="flex justify-end"><ExportDialog fromYear={fromYear} toYear={toYear} /></div>
       </aside>
+            </RPanel>
+          </Group>
+        </RPanel>
+        <Separator className="rs-handle" />
+        <RPanel defaultSize="36" minSize="15">
+          <Group orientation="horizontal" className="h-full">
+            <RPanel defaultSize="34" minSize="18">
+              <div className="panel flex h-full flex-col p-4">
+                <div className="mb-3 flex items-center justify-between"><div><div className="eyebrow">Region breakdown · {fromYear}–{toYear}</div><h3 className="mt-1 text-sm font-semibold">Hotspots by monitored region</h3></div><DemoBadge /></div>
+                <div className="flex-1 space-y-2 overflow-y-auto pr-1">
+                  {regionRows.map((r) => (
+                    <div key={r.name} className="text-xs">
+                      <div className="mb-1 flex justify-between"><span>{r.name}</span><span className="font-mono text-muted-foreground">{fmt(r.tot)} · peak {r.peak}</span></div>
+                      <div className="h-1.5 overflow-hidden rounded bg-surface-2"><div className="h-full rounded bg-gradient-to-r from-amber to-solar" style={{ width: `${(r.tot / maxTot) * 100}%` }} /></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </RPanel>
+            <Separator className="rs-handle" />
+            <RPanel defaultSize="30" minSize="18">
+              <div className="panel flex h-full flex-col p-4">
+                <div className="mb-2"><div className="eyebrow">Seasonal profile</div><h3 className="mt-1 text-sm font-semibold">Average hotspots by month</h3></div>
+                <div className="min-h-0 flex-1">
+                  <ResponsiveContainer>
+                    <BarChart data={seasonal}>
+                      <CartesianGrid stroke="var(--border)" vertical={false} />
+                      <XAxis dataKey="month" {...axis} />
+                      <YAxis {...axis} tickFormatter={fmt} width={40} />
+                      <Tooltip {...chartTooltip} formatter={(v: number) => v.toLocaleString()} />
+                      <Bar dataKey="avg" name="Avg hotspots" fill="var(--amber)" radius={[3, 3, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </RPanel>
+            <Separator className="rs-handle" />
+            <RPanel defaultSize="36" minSize="18">
+              <div className="panel flex h-full flex-col p-4">
+                <div className="mb-2"><div className="eyebrow">Sensor record</div><h3 className="mt-1 text-sm font-semibold">Yearly totals · MODIS vs VIIRS vs harmonised</h3></div>
+                <div className="min-h-0 flex-1">
+                  <ResponsiveContainer>
+                    <LineChart data={yearly}>
+                      <CartesianGrid stroke="var(--border)" vertical={false} />
+                      <XAxis dataKey="year" {...axis} />
+                      <YAxis {...axis} tickFormatter={fmt} width={44} />
+                      <Tooltip {...chartTooltip} formatter={(v: number) => v?.toLocaleString()} />
+                      <Line dataKey="modis" name="MODIS" stroke="var(--primary)" dot={false} strokeWidth={1.5} />
+                      <Line dataKey="viirs" name="VIIRS" stroke="var(--ice)" dot={false} strokeWidth={1.5} strokeDasharray="4 3" />
+                      <Line dataKey="harmonised" name="Harmonised" stroke="var(--solar)" dot={false} strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </RPanel>
+          </Group>
+        </RPanel>
+      </Group>
     </div>
   );
 }
