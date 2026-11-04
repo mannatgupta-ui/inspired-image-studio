@@ -20,8 +20,8 @@ uniform sampler2D dayMap; uniform sampler2D nightMap; uniform vec3 sun;
 varying vec2 vUv; varying vec3 vNormal;
 void main(){
   float d = dot(normalize(vNormal), sun);
-  float mixv = smoothstep(-0.15, 0.25, d);
-  vec3 day = texture2D(dayMap, vUv).rgb * (0.25 + 0.95*max(d,0.0));
+  float mixv = smoothstep(-0.25, 0.15, d);
+  vec3 day = texture2D(dayMap, vUv).rgb * (0.35 + 1.1*max(d,0.0));
   vec3 night = texture2D(nightMap, vUv).rgb * vec3(1.0,0.82,0.55) * 1.4;
   vec3 c = mix(night, day, mixv);
   gl_FragColor = vec4(c, 1.0);

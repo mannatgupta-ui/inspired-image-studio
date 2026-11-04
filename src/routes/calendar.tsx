@@ -26,8 +26,8 @@ const LABELS = ["Zero", "Low", "Moderate", "Elevated", "High", "Extreme"];
 
 function bucket(v: number, max: number) {
   if (v <= 0) return 0;
-  const r = Math.sqrt(v / max);
-  return r < 0.2 ? 1 : r < 0.4 ? 2 : r < 0.6 ? 3 : r < 0.8 ? 4 : 5;
+  const r = v / max;
+  return r < 0.12 ? 1 : r < 0.28 ? 2 : r < 0.45 ? 3 : r < 0.65 ? 4 : 5;
 }
 
 function CalendarPage() {

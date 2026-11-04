@@ -70,8 +70,9 @@ export default function FireMap({ sensors, viz, opacity = 1, drawing, selection,
   return (
     <MapContainer center={[10, 20]} zoom={2} minZoom={2} worldCopyJump style={{ height, width: "100%" }} zoomControl preferCanvas>
       <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        attribution='&copy; OpenStreetMap &copy; CARTO · Demo data'
+        url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+        maxNativeZoom={16}
+        attribution='Tiles &copy; Esri · Demo data'
       />
       {showRegions && REGIONS.map((r) => (
         <Rectangle key={r.id} bounds={r.bounds} pathOptions={{ color: "#39D5FF", weight: 0.6, opacity: 0.35, fillOpacity: 0.02, dashArray: "2 4" }}>
