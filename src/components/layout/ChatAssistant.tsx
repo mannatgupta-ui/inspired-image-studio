@@ -83,7 +83,7 @@ export function ChatAssistant({ open, onClose }: { open: boolean; onClose: () =>
             </div>
           )}
           {msgs.map((m, i) => (
-            <div key={i} className={cn("text-sm", m.role === "user" ? "ml-8 rounded-lg bg-primary px-3 py-2 text-primary-foreground" : "prose prose-sm prose-invert max-w-none text-foreground")}>
+            <div key={i} className={cn("text-sm", m.role === "user" ? "ml-8 rounded-lg bg-primary px-3 py-2 text-primary-foreground" : "chat-md text-foreground")}>
               {m.role === "user" ? m.content : <ReactMarkdown>{m.content}</ReactMarkdown>}
             </div>
           ))}
