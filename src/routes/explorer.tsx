@@ -60,30 +60,6 @@ function Explorer() {
     <div className="flex flex-col gap-4 p-4 md:p-6 xl:flex-row">
       <div className="w-full shrink-0 space-y-4 xl:w-[300px]">
         <div className="glass space-y-4 rounded-lg p-4">
-        <ClientOnly fallback={<MapFallback />}>
-          {view === "globe" ? (
-            <LazyEarth
-              spin={!drawing}
-              selection={bbox}
-              onPick={drawing ? (lat, lng) => {
-                const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-                applyBox([clamp(lat - 8, -85, 85), clamp(lng - 12, -180, 180), clamp(lat + 8, -85, 85), clamp(lng + 12, -180, 180)]);
-              } : undefined}
-            />
-          ) : (
-            <LazyFireMap sensors={sensors} viz={viz} opacity={opacity} drawing={drawing} selection={bbox} onSelect={applyBox} flyTo={fly} showRegions />
-          )}
-        </ClientOnly>
-        <div className="absolute right-3 top-3 z-[500]">
-          <Seg value={view} onChange={(v) => { setView(v); setDrawing(false); }} options={[{ v: "globe", l: "3D Globe" }, { v: "map", l: "2D Map" }]} />
-        </div>
-        {view === "globe" && (
-          <div className="glass absolute bottom-3 right-3 z-[500] max-w-[240px] rounded-lg p-3 text-xs text-muted-foreground">
-            {drawing ? "Click anywhere on the Earth to select a 16° × 24° area." : "Drag to rotate · scroll to zoom. Press “Select area” then click the Earth."}
-          </div>
-        )}
-
-        <div className="glass absolute left-14 top-3 z-[500] w-[270px] space-y-4 rounded-lg p-4">
           <div className="flex items-center justify-between"><span className="eyebrow text-primary">Control panel</span><DemoBadge /></div>
           <div className="flex gap-2">
             <button onClick={() => setDrawing((d) => !d)} className={`flex flex-1 items-center justify-center gap-1.5 rounded-md border py-2 text-xs ${drawing ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>
