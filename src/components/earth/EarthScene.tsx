@@ -30,7 +30,7 @@ const atmoFrag = `
 varying vec3 vNormal; uniform vec3 sun;
 void main(){
   float i = pow(0.72 - dot(vNormal, vec3(0.0,0.0,1.0)), 3.0);
-  gl_FragColor = vec4(0.25,0.75,1.0,1.0) * i * 1.6;
+  gl_FragColor = vec4(0.25,0.75,1.0,1.0) * i * 0.9;
 }`;
 const atmoVert = `varying vec3 vNormal; void main(){ vNormal=normalize(normalMatrix*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);} `;
 
