@@ -19,7 +19,7 @@ export interface FireMapProps {
 
 const fireColor = (frp: number) => (frp > 100 ? "#FF4D4D" : frp > 30 ? "#FF7939" : "#FFB547");
 
-function DrawBox({ active, onDone }: { active: boolean; onDone?: (b: [number, number, number, number]) => void }) {
+function DrawBox({ active, onDone }: { active: boolean; onDone?: ((b: [number, number, number, number]) => void) | undefined }) {
   const map = useMap();
   const [start, setStart] = useState<L.LatLng | null>(null);
   const [cur, setCur] = useState<L.LatLng | null>(null);

@@ -40,8 +40,8 @@ function Earth() {
     "/textures/earth_lights_2048.png",
     "/textures/earth_clouds_1024.png",
   ]);
-  day.colorSpace = THREE.SRGBColorSpace;
-  night.colorSpace = THREE.SRGBColorSpace;
+  day!.colorSpace = THREE.SRGBColorSpace;
+  night!.colorSpace = THREE.SRGBColorSpace;
   const group = useRef<THREE.Group>(null);
   const cloudRef = useRef<THREE.Mesh>(null);
   const markers = useRef<THREE.InstancedMesh>(null);
@@ -49,15 +49,11 @@ function Earth() {
   const hotspots = useMemo(() => sampleHotspots().filter((_, i) => i % 3 === 0), []);
   const uniforms = useMemo(() => ({ dayMap: { value: day }, nightMap: { value: night }, sun: { value: SUN } }), [day, night]);
 
-  useMemo(() => {
-    // placed after mount in effect below
-  }, []);
-
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);
     if (group.current) group.current.rotation.y += dt * 0.04;
     if (cloudRef.current) cloudRef.current.rotation.y += dt * 0.012;
-    if (markers.current && !markers.current.userData.ready) {
+    if (markers.current && !markers.current.userData["ready"]) {
       const m = new THREE.Object3D();
       hotspots.forEach((h, i) => {
         m.position.copy(latLngToVec(h.lat, h.lng, 1.004));
@@ -68,7 +64,7 @@ function Earth() {
         markers.current!.setMatrixAt(i, m.matrix);
       });
       markers.current.instanceMatrix.needsUpdate = true;
-      markers.current.userData.ready = true;
+      markers.current.userData["ready"] = true;
       (state.gl.domElement.parentElement?.parentElement as HTMLElement | null)?.setAttribute("data-scene-ready", "true");
     }
     if (markers.current) {
@@ -85,7 +81,7 @@ function Earth() {
       </mesh>
       <mesh ref={cloudRef} scale={1.012}>
         <sphereGeometry args={[1, 64, 64]} />
-        <meshStandardMaterial alphaMap={clouds} transparent opacity={0.35} color="#ffffff" depthWrite={false} />
+        <meshStandardMaterial alphaMap={clouds ?? null} transparent opacity={0.35} color="#ffffff" depthWrite={false} />
       </mesh>
       <instancedMesh ref={markers} args={[undefined, undefined, hotspots.length]}>
         <sphereGeometry args={[1, 8, 8]} />

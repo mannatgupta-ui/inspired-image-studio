@@ -64,7 +64,7 @@ function Overview() {
         <div className="pointer-events-none relative z-10 flex h-full flex-col justify-center px-6 md:px-12">
           <div className="max-w-xl">
             <div className="flex items-center gap-3"><span className="eyebrow text-primary">NASA Space Apps 2026 · Earth Observation</span></div>
-            <h1 className="mt-5 text-4xl font-bold leading-[1.05] md:text-6xl">
+            <h1 className="mt-5 text-4xl font-bold leading-[1.05] md:text-5xl xl:text-[3.5rem]">
               UNDERSTANDING FIRE.<br /><span className="bg-gradient-to-r from-amber via-solar to-critical bg-clip-text text-transparent">ACROSS TIME AND SPACE.</span>
             </h1>
             <p className="mt-5 max-w-md text-base text-muted-foreground">Unified satellite intelligence for monitoring, analysing, and understanding Earth's burning activity.</p>
