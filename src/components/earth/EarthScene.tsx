@@ -34,7 +34,32 @@ void main(){
 }`;
 const atmoVert = `varying vec3 vNormal; void main(){ vNormal=normalize(normalMatrix*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);} `;
 
-function Earth() {
+export type EarthProps = {
+  onPick?: ((lat: number, lng: number) => void) | undefined;
+  selection?: [number, number, number, number] | null | undefined;
+  spin?: boolean | undefined;
+};
+
+function SelectionBox({ b }: { b: [number, number, number, number] }) {
+  const geo = useMemo(() => {
+    const [s, w, n, e] = b;
+    const pts: THREE.Vector3[] = [];
+    const steps = 24;
+    for (let i = 0; i <= steps; i++) pts.push(latLngToVec(s, w + ((e - w) * i) / steps, 1.01));
+    for (let i = 0; i <= steps; i++) pts.push(latLngToVec(s + ((n - s) * i) / steps, e, 1.01));
+    for (let i = 0; i <= steps; i++) pts.push(latLngToVec(n, e - ((e - w) * i) / steps, 1.01));
+    for (let i = 0; i <= steps; i++) pts.push(latLngToVec(n - ((n - s) * i) / steps, w, 1.01));
+    return new THREE.BufferGeometry().setFromPoints(pts);
+  }, [b]);
+  return (
+    <line>
+      <primitive object={geo} attach="geometry" />
+      <lineBasicMaterial color="#ffffff" />
+    </line>
+  );
+}
+
+function Earth({ onPick, selection, spin = true }: EarthProps) {
   const [day, night, clouds] = useLoader(THREE.TextureLoader, [
     "/textures/earth_atmos_2048.jpg",
     "/textures/earth_lights_2048.png",
@@ -51,7 +76,7 @@ function Earth() {
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);
-    if (group.current) group.current.rotation.y += dt * 0.04;
+    if (group.current && spin) group.current.rotation.y += dt * 0.04;
     if (cloudRef.current) cloudRef.current.rotation.y += dt * 0.012;
     if (markers.current && !markers.current.userData["ready"]) {
       const m = new THREE.Object3D();
@@ -74,7 +99,20 @@ function Earth() {
   });
 
   return (
-    <group ref={group} rotation={[0.35, 2.2, 0]}>
+    <group
+      ref={group}
+      rotation={[0.35, 2.2, 0]}
+      onClick={(e) => {
+        if (!onPick || !group.current || e.delta > 5) return;
+        e.stopPropagation();
+        const p = group.current.worldToLocal(e.point.clone()).normalize();
+        const lat = 90 - (Math.acos(p.y) * 180) / Math.PI;
+        let lng = (Math.atan2(p.z, -p.x) * 180) / Math.PI - 180;
+        if (lng < -180) lng += 360;
+        onPick(lat, lng);
+      }}
+    >
+      {selection && <SelectionBox b={selection} />}
       <mesh>
         <sphereGeometry args={[1, 96, 96]} />
         <shaderMaterial vertexShader={earthVert} fragmentShader={earthFrag} uniforms={uniforms} />
@@ -130,16 +168,16 @@ function Satellite({ radius, speed, tilt, color }: { radius: number; speed: numb
   );
 }
 
-export default function EarthScene() {
+export default function EarthScene(props: EarthProps) {
   return (
     <div className="h-full w-full">
       <Canvas camera={{ position: [0, 0.2, 3.1], fov: 42 }} dpr={[1, 2]} gl={{ antialias: true }}>
-        <color attach="background" args={["#080D17"]} />
+        <color attach="background" args={["#000000"]} />
         <ambientLight intensity={0.25} />
         <directionalLight position={SUN.clone().multiplyScalar(5)} intensity={2.2} />
         <Stars radius={60} depth={30} count={2500} factor={2.5} fade speed={0.3} />
         <Suspense fallback={null}>
-          <Earth />
+          <Earth {...props} />
         </Suspense>
         <Atmosphere />
         <Satellite radius={1.35} speed={0.35} tilt={0.9} color="#39D5FF" />
