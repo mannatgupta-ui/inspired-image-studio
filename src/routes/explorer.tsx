@@ -58,7 +58,8 @@ function Explorer() {
 
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6 xl:flex-row">
-      <div className="relative h-[70vh] min-h-[520px] flex-1 overflow-hidden rounded-lg border border-border">
+      <div className="w-full shrink-0 space-y-4 xl:w-[300px]">
+        <div className="glass space-y-4 rounded-lg p-4">
         <ClientOnly fallback={<MapFallback />}>
           {view === "globe" ? (
             <LazyEarth
