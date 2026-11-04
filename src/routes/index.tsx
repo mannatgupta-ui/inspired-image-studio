@@ -36,9 +36,9 @@ function Overview() {
   const years = useMemo(() => yearlyTotals(g), [g]);
   const seasonal = useMemo(() => seasonalAverages(g), [g]);
   const total = years.reduce((s, y) => s + y.harmonised, 0);
-  const top = [...years].sort((a, b) => b.harmonised - a.harmonised)[0];
+  const top = [...years].sort((a, b) => b.harmonised - a.harmonised)[0]!;
   const avgYear = total / years.length;
-  const peak = [...seasonal].sort((a, b) => b.avg - a.avg)[0];
+  const peak = [...seasonal].sort((a, b) => b.avg - a.avg)[0]!;
   const seasonalMean = seasonal.reduce((s, x) => s + x.avg, 0) / 12;
   const last = years[years.length - 1];
   const [sensors, setSensors] = useState<Sensor[]>(["MODIS", "VIIRS"]);
