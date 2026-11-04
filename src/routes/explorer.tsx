@@ -121,7 +121,7 @@ function Explorer() {
             <div><dt className="text-muted-foreground">AREA</dt><dd className="mt-1 text-lg text-foreground">{bbox ? fmt(bboxAreaKm2(...bbox)) + " km²" : "Global"}</dd></div>
             <div><dt className="text-muted-foreground">SAMPLE DETECTIONS</dt><dd className="mt-1 text-lg text-solar">{inBox.length.toLocaleString()}</dd></div>
             <div><dt className="text-muted-foreground">MONTHLY TOTAL</dt><dd className="mt-1 text-lg text-amber">{fmt(total)}</dd></div>
-            <div><dt className="text-muted-foreground">REGIONS</dt><dd className="mt-1 text-lg">{sel.regionId === "global" ? REGIONS.length : sel.regionIds.length}</dd></div>
+            <div><dt className="text-muted-foreground">REGIONS</dt><dd className="mt-1 text-lg">{sel.bbox ? sel.regionIds.length : sel.regionId === "global" ? REGIONS.length : sel.regionIds.length}</dd></div>
           </dl>
           {bbox && <div className="mt-3 rounded border border-border bg-background/40 p-2 font-mono text-[11px] text-muted-foreground">S {bbox[0].toFixed(2)} · W {bbox[1].toFixed(2)} · N {bbox[2].toFixed(2)} · E {bbox[3].toFixed(2)}</div>}
           {sel.regionId === "custom" && !sel.regionIds.length && <p className="mt-2 text-xs text-muted-foreground">No monitored region intersects this box.</p>}
