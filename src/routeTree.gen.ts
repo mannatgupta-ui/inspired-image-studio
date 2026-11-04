@@ -14,7 +14,6 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as ExplorerRouteImport } from './routes/explorer'
 import { Route as HarmonisationRouteImport } from './routes/harmonisation'
-import { Route as MethodologyRouteImport } from './routes/methodology'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -41,11 +40,6 @@ const HarmonisationRoute = HarmonisationRouteImport.update({
   path: '/harmonisation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MethodologyRoute = MethodologyRouteImport.update({
-  id: '/methodology',
-  path: '/methodology',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -53,7 +47,6 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/explorer': typeof ExplorerRoute
   '/harmonisation': typeof HarmonisationRoute
-  '/methodology': typeof MethodologyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,7 +54,6 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/explorer': typeof ExplorerRoute
   '/harmonisation': typeof HarmonisationRoute
-  '/methodology': typeof MethodologyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,25 +62,12 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/explorer': typeof ExplorerRoute
   '/harmonisation': typeof HarmonisationRoute
-  '/methodology': typeof MethodologyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/analytics'
-    | '/calendar'
-    | '/explorer'
-    | '/harmonisation'
-    | '/methodology'
+  fullPaths: '/' | '/analytics' | '/calendar' | '/explorer' | '/harmonisation'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/analytics'
-    | '/calendar'
-    | '/explorer'
-    | '/harmonisation'
-    | '/methodology'
+  to: '/' | '/analytics' | '/calendar' | '/explorer' | '/harmonisation'
   id:
     | '__root__'
     | '/'
@@ -96,7 +75,6 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/explorer'
     | '/harmonisation'
-    | '/methodology'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -105,7 +83,6 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   ExplorerRoute: typeof ExplorerRoute
   HarmonisationRoute: typeof HarmonisationRoute
-  MethodologyRoute: typeof MethodologyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -145,13 +122,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HarmonisationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/methodology': {
-      id: '/methodology'
-      path: '/methodology'
-      fullPath: '/methodology'
-      preLoaderRoute: typeof MethodologyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -161,7 +131,6 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   ExplorerRoute: ExplorerRoute,
   HarmonisationRoute: HarmonisationRoute,
-  MethodologyRoute: MethodologyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
