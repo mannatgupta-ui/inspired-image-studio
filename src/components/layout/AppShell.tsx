@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import {
-  Globe2, Map, CalendarDays, LineChart, Satellite, BookOpen, ChevronsLeft, Search, Bell, Radio,
+  Globe2, Map, CalendarDays, LineChart, Satellite, ChevronsLeft, Search, Bell, Radio,
 } from "lucide-react";
 import { useSelection, setSelection } from "@/lib/store";
 import { REGIONS } from "@/lib/fire-data";
@@ -13,7 +13,6 @@ const NAV = [
   { to: "/calendar", label: "Burning Calendar", icon: CalendarDays },
   { to: "/analytics", label: "Historical Analytics", icon: LineChart },
   { to: "/harmonisation", label: "Sensor Harmonisation", icon: Satellite },
-  { to: "/methodology", label: "Methodology", icon: BookOpen },
 ] as const;
 
 function Logo({ compact }: { compact: boolean }) {

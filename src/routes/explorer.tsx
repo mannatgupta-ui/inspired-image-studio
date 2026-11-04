@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Square, RotateCcw, Crosshair, Layers, MapPin } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ClientOnly, LazyFireMap, MapFallback, Panel, DemoBadge, Seg, chartTooltip, axis } from "@/components/ui-hs/bits";
+import { ClientOnly, LazyEarth, LazyFireMap, MapFallback, Panel, DemoBadge, Seg, chartTooltip, axis } from "@/components/ui-hs/bits";
 import { ExportDialog } from "@/components/export/ExportDialog";
 import type { Viz } from "@/components/maps/FireMap";
 import { bboxAreaKm2, fmt, MONTHS, REGIONS, regionsInBox, sampleHotspots, type Sensor } from "@/lib/fire-data";
@@ -28,6 +28,7 @@ function Explorer() {
   const [viz, setViz] = useState<Viz>("points");
   const [opacity, setOpacity] = useState(1);
   const [drawing, setDrawing] = useState(false);
+  const [view, setView] = useState<"globe" | "map">("globe");
   const [fromYear, setFromYear] = useState(2015);
   const [toYear, setToYear] = useState(2025);
   const [fly, setFly] = useState<[[number, number], [number, number]] | null>(null);
@@ -59,14 +60,33 @@ function Explorer() {
     <div className="flex flex-col gap-4 p-4 md:p-6 xl:flex-row">
       <div className="relative h-[70vh] min-h-[520px] flex-1 overflow-hidden rounded-lg border border-border">
         <ClientOnly fallback={<MapFallback />}>
-          <LazyFireMap sensors={sensors} viz={viz} opacity={opacity} drawing={drawing} selection={bbox} onSelect={applyBox} flyTo={fly} showRegions />
+          {view === "globe" ? (
+            <LazyEarth
+              spin={!drawing}
+              selection={bbox}
+              onPick={drawing ? (lat, lng) => {
+                const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+                applyBox([clamp(lat - 8, -85, 85), clamp(lng - 12, -180, 180), clamp(lat + 8, -85, 85), clamp(lng + 12, -180, 180)]);
+              } : undefined}
+            />
+          ) : (
+            <LazyFireMap sensors={sensors} viz={viz} opacity={opacity} drawing={drawing} selection={bbox} onSelect={applyBox} flyTo={fly} showRegions />
+          )}
         </ClientOnly>
+        <div className="absolute right-3 top-3 z-[500]">
+          <Seg value={view} onChange={(v) => { setView(v); setDrawing(false); }} options={[{ v: "globe", l: "3D Globe" }, { v: "map", l: "2D Map" }]} />
+        </div>
+        {view === "globe" && (
+          <div className="glass absolute bottom-3 right-3 z-[500] max-w-[240px] rounded-lg p-3 text-xs text-muted-foreground">
+            {drawing ? "Click anywhere on the Earth to select a 16° × 24° area." : "Drag to rotate · scroll to zoom. Press “Select area” then click the Earth."}
+          </div>
+        )}
 
         <div className="glass absolute left-14 top-3 z-[500] w-[270px] space-y-4 rounded-lg p-4">
           <div className="flex items-center justify-between"><span className="eyebrow text-primary">Control panel</span><DemoBadge /></div>
           <div className="flex gap-2">
             <button onClick={() => setDrawing((d) => !d)} className={`flex flex-1 items-center justify-center gap-1.5 rounded-md border py-2 text-xs ${drawing ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>
-              <Square className="h-3.5 w-3.5" /> {drawing ? "Drag on map…" : "Draw area"}
+              <Square className="h-3.5 w-3.5" /> {drawing ? (view === "globe" ? "Click the Earth…" : "Drag on map…") : (view === "globe" ? "Select area" : "Draw area")}
             </button>
             <button title="Zoom to selection" disabled={!bbox} onClick={() => bbox && setFly([[bbox[0], bbox[1]], [bbox[2], bbox[3]]])} className="rounded-md border border-border px-2.5 text-muted-foreground hover:text-foreground disabled:opacity-40"><Crosshair className="h-3.5 w-3.5" /></button>
             <button title="Reset" onClick={() => { setSelection({ regionId: "global", label: "Global", bbox: null, regionIds: [] }); setFly([[-60, -170], [75, 170]]); }} className="rounded-md border border-border px-2.5 text-muted-foreground hover:text-foreground"><RotateCcw className="h-3.5 w-3.5" /></button>
